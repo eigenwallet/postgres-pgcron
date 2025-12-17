@@ -60,7 +60,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           build-args: |
-            PG_VERSION=${{ matrix.pg_version }}
+            PG_MAJOR=${{ matrix.pg_version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=pg-${{ matrix.pg_version }}
