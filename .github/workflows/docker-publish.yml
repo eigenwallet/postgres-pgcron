@@ -18,6 +18,14 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        pg_version: [15, 16]
+        include:
+          - pg_version: 15
+            is_latest: false
+          - pg_version: 16
+            is_latest: true
 
     steps:
       - name: Checkout repository
@@ -42,8 +50,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=15
-            type=raw,value=latest
+            type=raw,value=${{ matrix.pg_version }}
+            type=raw,value=latest,enable=${{ matrix.is_latest }}
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -51,7 +59,9 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          build-args: |
+            PG_VERSION=${{ matrix.pg_version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=pg-${{ matrix.pg_version }}
+          cache-to: type=gha,mode=max,scope=pg-${{ matrix.pg_version }}
